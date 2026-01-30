@@ -1,0 +1,155 @@
+---
+clusterName: kubernetes
+
+talosVersion: "${talosVersion}"
+kubernetesVersion: "${kubernetesVersion}"
+
+endpoint: https://10.40.0.2:6443
+additionalApiServerCertSans: &sans
+  - "127.0.0.1"
+  - &talosControlplaneVip "10.40.0.2"
+additionalMachineCertSans: *sans
+
+clusterPodNets: ["10.42.0.0/16"]
+clusterSvcNets: ["10.43.0.0/16"]
+
+# Disable built-in CNI to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "edge001"
+    ipAddress: "10.40.0.101"
+    installDiskSelector:
+      model: "Samsung SSD 870"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/d95e9ce1849c31a3b9d777ed22cb9a1dad986285433211b4292acc8d0114d7dd
+    controlPlane: true
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors:
+            - hardwareAddr: "58:47:ca:77:39:b1"
+              driver: igc
+        dhcp: true
+        vip:
+          ip: *talosControlplaneVip
+        vlans:
+          - vlanId: 1
+            dhcp: false
+            addresses:
+              - 10.10.0.101/24
+            mtu: 1500
+          - vlanId: 20
+            dhcp: false
+            addresses:
+              - 10.20.0.101/24
+            mtu: 1500
+    schematic:
+      customization:
+          extraKernelArgs:
+              - net.ifnames=1
+          systemExtensions:
+              officialExtensions:
+                  - siderolabs/i915
+                  - siderolabs/intel-ice-firmware
+                  - siderolabs/intel-ucode
+                  - siderolabs/mei
+                  - siderolabs/thunderbolt
+  - hostname: "edge002"
+    ipAddress: "10.40.0.102"
+    installDiskSelector:
+      model: "Samsung SSD 870"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/d95e9ce1849c31a3b9d777ed22cb9a1dad986285433211b4292acc8d0114d7dd
+    controlPlane: false
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors:
+            - hardwareAddr: "58:47:ca:77:36:b5"
+              driver: igc
+        dhcp: true
+        vip:
+          ip: *talosControlplaneVip
+        vlans:
+          - vlanId: 1
+            dhcp: false
+            addresses:
+              - 10.10.0.102/24
+            mtu: 1500
+          - vlanId: 20
+            dhcp: false
+            addresses:
+              - 10.20.0.102/24
+            mtu: 1500
+    schematic:
+      customization:
+          extraKernelArgs:
+              - net.ifnames=1
+          systemExtensions:
+              officialExtensions:
+                  - siderolabs/i915
+                  - siderolabs/intel-ice-firmware
+                  - siderolabs/intel-ucode
+                  - siderolabs/mei
+                  - siderolabs/thunderbolt
+  - hostname: "edge003"
+    ipAddress: "10.40.0.103"
+    installDiskSelector:
+      model: "VK0300GDUQV"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/d95e9ce1849c31a3b9d777ed22cb9a1dad986285433211b4292acc8d0114d7dd
+    controlPlane: false
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors:
+            - hardwareAddr: "38:05:25:31:13:b7"
+              driver: igc
+        dhcp: true
+        vip:
+          ip: *talosControlplaneVip
+        vlans:
+          - vlanId: 1
+            dhcp: false
+            addresses:
+              - 10.10.0.103/24
+            mtu: 1500
+          - vlanId: 20
+            dhcp: false
+            addresses:
+              - 10.20.0.103/24
+            mtu: 1500
+    schematic:
+      customization:
+          extraKernelArgs:
+              - net.ifnames=1
+          systemExtensions:
+              officialExtensions:
+                  - siderolabs/i915
+                  - siderolabs/intel-ice-firmware
+                  - siderolabs/intel-ucode
+                  - siderolabs/mei
+                  - siderolabs/thunderbolt
+
+# Global patches
+patches:
+  - "@./patches/global/machine-files.yaml"
+  - "@./patches/global/machine-kubelet.yaml"
+  - "@./patches/global/machine-network.yaml"
+  - "@./patches/global/machine-sysctls.yaml"
+  - "@./patches/global/machine-time.yaml"
+  - "@./patches/global/machine-openebs.yaml"
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@./patches/controller/cluster.yaml"
+
