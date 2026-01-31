@@ -6,3 +6,4 @@ resources:
   - ./flame/ks.yaml
   - ./glance/ks.yaml
   - ./meilisearch/ks.yaml
+  - ./librechat/ks.yaml
