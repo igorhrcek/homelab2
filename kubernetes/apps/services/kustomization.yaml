@@ -5,3 +5,4 @@ resources:
   - ./namespace.yaml
   - ./flame/ks.yaml
   - ./glance/ks.yaml
+  - ./meilisearch/ks.yaml
