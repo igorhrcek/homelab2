@@ -15,6 +15,13 @@ spec:
   interval: 15m
   retryInterval: 1m
   timeout: 3m
+  dependsOn:
+    - name: volsync
+      namespace: flux-system
+    - name: external-dns
+      namespace: network
+    - name: unifi-dns
+      namespace: network
   postBuild:
     substitute:
       APP: *app
