@@ -65,7 +65,7 @@ nodes:
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/d95e9ce1849c31a3b9d777ed22cb9a1dad986285433211b4292acc8d0114d7dd
-    controlPlane: false
+    controlPlane: true
     networkInterfaces:
       - interface: bond0
         bond:
@@ -101,11 +101,11 @@ nodes:
   - hostname: "edge003"
     ipAddress: "10.40.0.103"
     installDiskSelector:
-      model: "VK0300GDUQV"
+      model: "Samsung SSD 870"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/d95e9ce1849c31a3b9d777ed22cb9a1dad986285433211b4292acc8d0114d7dd
-    controlPlane: false
+    controlPlane: true
     networkInterfaces:
       - interface: bond0
         bond:
