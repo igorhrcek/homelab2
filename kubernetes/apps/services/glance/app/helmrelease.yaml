@@ -1,0 +1,70 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: glance
+  namespace: apps
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      glance:
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        replicas: 1
+
+        containers:
+          app:
+            image:
+              repository: glanceapp/glance
+              tag: v0.8.4
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+
+    service:
+      app:
+        controller: &app glance
+        ports:
+          http:
+            port: &port 8080
+
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: dashboard-configuration
+        globalMounts:
+          - path: /app/config/glance.yml
+            subPath: glance.yml
+
+    route:
+      app:
+        hostnames: ["dash.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+
