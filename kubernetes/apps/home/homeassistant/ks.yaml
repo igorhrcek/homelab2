@@ -20,6 +20,19 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
+  dependsOn:
+    - name: onepassword-connect-clustersecretstore
+      namespace: flux-system
+    - name: volsync
+      namespace: flux-system
+    - name: z2mqtt
+      namespace: flux-system
+    - name: govee2mqtt
+      namespace: flux-system
+    - name: external-dns
+      namespace: network
+    - name: unifi-dns
+      namespace: network
   postBuild:
     substitute:
       APP: *app
@@ -27,3 +40,6 @@ spec:
       VOLSYNC_CAPACITY: 10Gi
       APP_UID: "1000"
       APP_GID: "1000"
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
