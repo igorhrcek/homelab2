@@ -20,6 +20,13 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
+  dependsOn:
+    - name: onepassword-connect-clustersecretstore
+      namespace: flux-system
+    - name: volsync
+      namespace: flux-system
+    - name: vernemq
+      namespace: flux-system
   postBuild:
     substitute:
       APP: *app
