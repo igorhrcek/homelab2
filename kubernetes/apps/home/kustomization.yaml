@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   - ./vernemq/ks.yaml
-  # - ./zigbee2mqtt/kustomization.yaml
+  - ./zigbee2mqtt/ks.yaml
   # - ./homeassistant/kustomization.yaml
   # - ./govee2mqtt/kustomization.yaml
