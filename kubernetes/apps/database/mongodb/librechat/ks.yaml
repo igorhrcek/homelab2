@@ -16,6 +16,13 @@ spec:
   interval: 1h
   retryInterval: 2m
   timeout: 5m
+  dependsOn:
+    - name: mongodb-operator
+      namespace: flux-system
+    - name: onepassword-connect-clustersecretstore
+      namespace: flux-system
+    - name: volsync
+      namespace: flux-system
   postBuild:
     substitute:
       MONGO_APP: *app

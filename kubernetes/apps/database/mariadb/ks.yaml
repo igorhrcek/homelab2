@@ -49,6 +49,11 @@ spec:
   timeout: 5m
   dependsOn:
     - name: mariadb-operator
+      namespace: flux-system
+    - name: onepassword-connect-clustersecretstore
+      namespace: flux-system
+    - name: volsync
+      namespace: flux-system
   postBuild:
     substitute:
       APP: *app
