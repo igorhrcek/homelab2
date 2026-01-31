@@ -3,14 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app sabnzbd
+  name: &app qbittorrent
   namespace: flux-system
 spec:
-  targetNamespace: apps
+  targetNamespace: media
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/media/sabnzbd/app
+  path: ./kubernetes/apps/media/qbittorrent/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -25,13 +25,11 @@ spec:
       namespace: flux-system
     - name: unifi-dns
       namespace: network
-    - name: openebs
-      namespace: flux-system
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CLAIM: sabnzbd-config
-      VOLSYNC_CAPACITY: 10Gi
+      VOLSYNC_CLAIM: qbittorrent-config
+      VOLSYNC_CAPACITY: 5Gi
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
