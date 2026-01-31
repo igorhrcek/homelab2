@@ -7,4 +7,4 @@ resources:
   - ./onepassword-connect/ks.yaml
   - ./external-secrets/ks.yaml
   - ./volsync/ks.yaml
-  # - ./atuin/ks.yaml
+  - ./atuin/ks.yaml
