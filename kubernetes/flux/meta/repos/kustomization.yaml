@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./external-dns.yaml
+  - ./onepassword.yaml
+  - ./bjw-s.yaml
+  - ./backube.yaml
+  - ./openebs.yaml
+  - ./node-feature-discovery.yaml
+  - ./mariadb.yaml
+  - ./redis-operator.yaml
+  - ./redis-standalone.yaml
+  - ./meilisearch.yaml
+  - ./app-template.yaml
