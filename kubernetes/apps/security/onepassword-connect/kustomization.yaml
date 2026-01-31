@@ -13,6 +13,8 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 1m
+  dependsOn:
+    - name: external-secrets
   decryption:
     provider: sops
     secretRef:

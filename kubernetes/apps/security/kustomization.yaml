@@ -5,6 +5,6 @@ resources:
   - ./namespace.yaml
   - ./snapshot-controller/kustomization.yaml
   - ./onepassword-connect/kustomization.yaml
-  # - ./external-secrets/kustomization.yaml
+  - ./external-secrets/kustomization.yaml
   # - ./volsync/kustomization.yaml
   # - ./atuin/kustomization.yaml
