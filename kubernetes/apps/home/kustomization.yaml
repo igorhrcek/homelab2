@@ -6,4 +6,4 @@ resources:
   - ./vernemq/ks.yaml
   - ./zigbee2mqtt/ks.yaml
   # - ./homeassistant/kustomization.yaml
-  # - ./govee2mqtt/kustomization.yaml
+  - ./govee2mqtt/ks.yaml
