@@ -32,3 +32,6 @@ spec:
       APP: *app
       VOLSYNC_CLAIM: flame-config
       VOLSYNC_CAPACITY: 1Gi
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret

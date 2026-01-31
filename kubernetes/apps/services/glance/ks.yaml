@@ -27,3 +27,7 @@ spec:
   dependsOn:
     - name: unifi-dns
       namespace: network
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
