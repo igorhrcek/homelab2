@@ -8,6 +8,6 @@ resources:
   - ./backup.yaml
   - ./secret.yaml
   - ./secret-backup.yaml
-  - ./user-invoiceninja.yaml
-  - ./grant-invoiceninja.yaml
+  # - ./user-invoiceninja.yaml
+  # - ./grant-invoiceninja.yaml
   # - ./restore.yaml
