@@ -6,5 +6,4 @@ namespace: apps
 resources:
   - ./helmrelease.yaml
   - ./secret.yaml
-  - ./configmap.yaml
   - ../../../../templates/volsync
