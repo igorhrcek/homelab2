@@ -9,6 +9,6 @@ resources:
   - ./secret.yaml
   - ./secret-backup.yaml
   - ./database-invoiceninja.yaml
-  # - ./user-invoiceninja.yaml
+  - ./user-invoiceninja.yaml
   # - ./grant-invoiceninja.yaml
   # - ./restore.yaml
