@@ -1,0 +1,35 @@
+---
+data_dir: /vector-data-dir
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+  k8s_source:
+    type: vector
+    version: "2"
+    address: 0.0.0.0:6001
+
+transforms:
+  k8s_transform:
+    type: remap
+    inputs: [k8s_source]
+    source: |
+      .log = parse_json(.message) ?? .message
+      del(.message)
+
+sinks:
+  vlogs:
+    type: elasticsearch
+    inputs: [k8s_transform]
+    endpoints:
+      - http://victorialogs-victoria-logs-single-server.monitoring.svc:9428/insert/elasticsearch/
+    mode: bulk
+    api_version: v8
+    compression: gzip
+    healthcheck:
+      enabled: false
+    query:
+      _msg_field: message,msg,_msg,log.msg,log.message,log
+      _time_field: timestamp
+      _stream_fields: stream,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
