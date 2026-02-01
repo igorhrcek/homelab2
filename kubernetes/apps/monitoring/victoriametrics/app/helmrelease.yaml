@@ -174,12 +174,8 @@ spec:
               args:
                 - -dst=s3://backups/victoriametrics
                 - -customS3Endpoint=https://5fda75e1262c2da5d9b80e4218045c63.r2.cloudflarestorage.com
+                - -snapshotCreateURL=http://localhost:8482/snapshot/create
               env:
-                - name: SNAPSHOT_CREATE_URL
-                  valueFrom:
-                    secretKeyRef:
-                      name: vmbackup-secret
-                      key: SNAPSHOT_CREATE_URL
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
