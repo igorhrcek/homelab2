@@ -1,0 +1,29 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'github>igorhrcek/renovate-config',
+    'github>igorhrcek/renovate-config:automerge-github-actions',
+    'github>igorhrcek/homelab2//.renovate/groups.json5',
+    'github>igorhrcek/homelab2//.renovate/versioning.json5',
+    'github>igorhrcek/homelab2//.renovate/autoMerge.json5',
+    'github>igorhrcek/homelab2//.renovate/customManagers.json5',
+  ],
+  ignorePaths: [
+    '.archive/**',
+  ],
+  flux: {
+    managerFilePatterns: [
+      '/^kubernetes/.+\\.ya?ml$/',
+    ],
+  },
+  'helm-values': {
+    managerFilePatterns: [
+      '/^kubernetes/.+\\.ya?ml$/',
+    ],
+  },
+  kubernetes: {
+    managerFilePatterns: [
+      '/^kubernetes/.+\\.ya?ml$/',
+    ],
+  },
+}
