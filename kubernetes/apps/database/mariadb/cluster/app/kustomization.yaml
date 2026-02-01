@@ -8,3 +8,4 @@ resources:
   - ./backup.yaml
   - ./secret.yaml
   - ./secret-backup.yaml
+  - ./restore.yaml
