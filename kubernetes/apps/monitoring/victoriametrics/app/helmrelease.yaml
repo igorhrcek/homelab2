@@ -169,15 +169,12 @@ spec:
                 secretName: vmbackup-secret
           containers:
             - name: vmbackup
-              image: victoriametrics/vmbackup:latest
-              imagePullPolicy: Always
+              image: victoriametrics/vmbackup:v1.134.0
               args:
                 - -dst=s3://backups/victoriametrics
                 - -customS3Endpoint=https://5fda75e1262c2da5d9b80e4218045c63.r2.cloudflarestorage.com
                 - -snapshot.createURL=http://localhost:8482/snapshot/create
                 - -storageDataPath=/storage
-                - -runOnStart=true
-                - -disableHourly
               env:
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
