@@ -169,7 +169,7 @@ spec:
                 secretName: vmbackup-secret
           containers:
             - name: vmbackup
-              image: europe-docker.pkg.dev/mailerlitehub/vmbackup/vmbackup:v2.0.0
+              image: victoriametrics/vmbackup:latest
               imagePullPolicy: Always
               args:
                 - -dst=s3://backups/victoriametrics
