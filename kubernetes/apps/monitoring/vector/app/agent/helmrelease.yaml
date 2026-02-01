@@ -63,10 +63,6 @@ spec:
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: "10.40.0.16"
-        ports:
-          mikrotik:
-            port: 1514
-            protocol: UDP
     serviceAccount:
       vector-agent:
         enabled: true
