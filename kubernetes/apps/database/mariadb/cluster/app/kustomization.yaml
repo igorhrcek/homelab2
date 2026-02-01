@@ -11,4 +11,4 @@ resources:
   - ./database-invoiceninja.yaml
   - ./user-invoiceninja.yaml
   - ./grant-invoiceninja.yaml
-  # - ./restore.yaml
+  - ./restore.yaml
