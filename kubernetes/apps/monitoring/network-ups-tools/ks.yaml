@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/monitoring/ups-tools/app
+  path: ./kubernetes/apps/monitoring/network-ups-tools/app
   prune: true
   sourceRef:
     kind: GitRepository
