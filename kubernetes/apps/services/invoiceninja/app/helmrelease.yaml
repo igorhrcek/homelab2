@@ -67,19 +67,19 @@ spec:
                 port: *port
 
     persistence:
-      # public:
-      #   enabled: true
-      #   type: persistentVolumeClaim
-      #   accessMode: ReadWriteOnce
-      #   size: 10Gi
-      #   storageClass: ceph-block
-      #   advancedMounts:
-      #     invoiceninja:
-      #       app:
-      #         - path: /var/www/html/public
-      #       nginx:
-      #         - path: /var/www/html/public
-      #           readOnly: true
+      public:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
+        advancedMounts:
+          invoiceninja:
+            app:
+              - path: /var/www/html/public
+            nginx:
+              - path: /var/www/html/public
+                readOnly: true
 
       storage:
         enabled: true
