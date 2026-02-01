@@ -1,0 +1,14 @@
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: invoiceninja
+  namespace: database
+spec:
+  mariaDbRef:
+    name: mariadb
+  privileges:
+    - "ALL PRIVILEGES"
+  database: invoiceninja
+  table: "*"
+  username: invoiceninja
