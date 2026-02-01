@@ -23,7 +23,6 @@ spec:
     config:
       devices:
         - /dev/nvme0n1
-        - /dev/nvme1n1
         - /dev/sda
     serviceMonitor:
       enabled: true
