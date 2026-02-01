@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.6.2
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -58,8 +58,9 @@ spec:
         containers:
           app:
             image:
+              # renovate: datasource=docker depName=ghcr.io/danny-avila/librechat-dev
               repository: ghcr.io/danny-avila/librechat
-              tag: v0.8.1
+              tag: latest@sha256:a0356b88473b8f7ba155bc3da65f6f5d367617e26b76a4196222f876d2cbf834
             env: &env
               ENDPOINTS: "agents,assistants,custom"
               PORT: "3080"
