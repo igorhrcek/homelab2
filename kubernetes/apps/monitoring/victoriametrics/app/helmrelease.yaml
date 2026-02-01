@@ -173,6 +173,12 @@ spec:
               command: ["/bin/sh", "-c"]
               args:
                 - |
+                  echo "Waiting for vmstorage to be ready..."
+                  until wget -q --spider http://localhost:8482/health; do
+                    echo "vmstorage not ready, waiting 10s..."
+                    sleep 10
+                  done
+                  echo "vmstorage is ready, starting backup loop"
                   while true; do
                     /vmbackup-prod \
                       -dst=s3://backups/victoriametrics \

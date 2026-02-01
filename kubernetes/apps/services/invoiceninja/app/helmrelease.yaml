@@ -29,6 +29,20 @@ spec:
 
         replicas: 1
 
+        initContainers:
+          init-storage:
+            image:
+              repository: busybox
+              tag: latest
+            command:
+              - sh
+              - -c
+              - |
+                mkdir -p /var/www/html/storage/app/public
+                mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
+                mkdir -p /var/www/html/storage/logs
+                chown -R 1500:1500 /var/www/html/storage
+
         containers:
           app:
             image:
@@ -67,32 +81,22 @@ spec:
                 port: *port
 
     persistence:
-      public:
-        enabled: true
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
-        advancedMounts:
-          invoiceninja:
-            app:
-              - path: /var/www/html/public
-            nginx:
-              - path: /var/www/html/public
-                readOnly: true
-
       storage:
-        enabled: true
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: ceph-block
+        existingClaim: invoiceninja-storage
         advancedMounts:
           invoiceninja:
+            init-storage:
+              - path: /var/www/html/storage
             app:
               - path: /var/www/html/storage
+              # Mount storage/app/public to public/storage (replaces Laravel's symlink)
+              - path: /var/www/html/public/storage
+                subPath: app/public
             nginx:
               - path: /var/www/html/storage
+                readOnly: true
+              - path: /var/www/html/public/storage
+                subPath: app/public
                 readOnly: true
 
       config:
