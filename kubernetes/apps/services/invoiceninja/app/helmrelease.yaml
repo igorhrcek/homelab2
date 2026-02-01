@@ -37,10 +37,9 @@ spec:
               - sh
               - -c
               - |
-                mkdir -p /var/app/storage/app/public
-                mkdir -p /var/app/storage/framework/{cache,sessions,views}
-                mkdir -p /var/app/storage/logs
-                chown -R 1500:1500 /var/app/storage
+                mkdir -p /storage/app/public
+                mkdir -p /storage/framework/{cache,sessions,views}
+                mkdir -p /storage/logs
           init-public:
             image:
               repository: invoiceninja/invoiceninja
@@ -49,8 +48,17 @@ spec:
               - sh
               - -c
               - |
-                cp -a /var/app/public/. /public/
-                chown -R 1500:1500 /public
+                # Find and copy public files
+                if [ -d /var/www/html/public ]; then
+                  cp -a /var/www/html/public/. /public/
+                elif [ -d /var/www/app/public ]; then
+                  cp -a /var/www/app/public/. /public/
+                else
+                  echo "Public dir not found, listing /var/www:"
+                  ls -la /var/www/ || true
+                  ls -la /var/ || true
+                  exit 1
+                fi
 
         containers:
           app:
@@ -72,7 +80,7 @@ spec:
                 server {
                     listen 80 default_server;
                     server_name _;
-                    root /var/www/app/public;
+                    root /var/www/html/public;
                     index index.php;
                     client_max_body_size 100M;
 
@@ -130,9 +138,9 @@ spec:
         advancedMounts:
           invoiceninja:
             init-storage:
-              - path: /var/app/storage
+              - path: /storage
             app:
-              - path: /var/app/storage
+              - path: /var/www/html/storage
       public:
         type: emptyDir
         advancedMounts:
@@ -140,17 +148,17 @@ spec:
             init-public:
               - path: /public
             app:
-              - path: /var/app/public
+              - path: /var/www/html/public
             nginx:
-              - path: /var/www/app/public
+              - path: /var/www/html/public
       # Mount uploaded files into public/storage
       public-storage:
         existingClaim: invoiceninja-storage
         advancedMounts:
           invoiceninja:
             app:
-              - path: /var/app/public/storage
+              - path: /var/www/html/public/storage
                 subPath: app/public
             nginx:
-              - path: /var/www/app/public/storage
+              - path: /var/www/html/public/storage
                 subPath: app/public
