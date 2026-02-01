@@ -37,10 +37,20 @@ spec:
               - sh
               - -c
               - |
-                mkdir -p /var/www/html/storage/app/public
-                mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
-                mkdir -p /var/www/html/storage/logs
-                chown -R 1500:1500 /var/www/html/storage
+                mkdir -p /var/app/storage/app/public
+                mkdir -p /var/app/storage/framework/{cache,sessions,views}
+                mkdir -p /var/app/storage/logs
+                chown -R 1500:1500 /var/app/storage
+          init-public:
+            image:
+              repository: invoiceninja/invoiceninja
+              tag: 5.12
+            command:
+              - sh
+              - -c
+              - |
+                cp -a /var/app/public/. /public/
+                chown -R 1500:1500 /public
 
         containers:
           app:
@@ -50,11 +60,46 @@ spec:
             envFrom:
               - secretRef:
                   name: invoiceninja-secret
-            probes:
-              liveness:
-                enabled: true
-              readiness:
-                enabled: true
+
+          nginx:
+            image:
+              repository: nginx
+              tag: alpine
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                cat > /etc/nginx/conf.d/default.conf << 'EOF'
+                server {
+                    listen 80 default_server;
+                    server_name _;
+                    root /var/www/app/public;
+                    index index.php;
+                    client_max_body_size 100M;
+
+                    location / {
+                        try_files $uri $uri/ /index.php?$query_string;
+                    }
+
+                    location = /favicon.ico { access_log off; log_not_found off; }
+                    location = /robots.txt  { access_log off; log_not_found off; }
+
+                    location ~ \.php$ {
+                        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                        fastcgi_pass 127.0.0.1:9000;
+                        fastcgi_index index.php;
+                        include fastcgi_params;
+                        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                        fastcgi_param PATH_INFO $fastcgi_path_info;
+                        fastcgi_buffer_size 16k;
+                        fastcgi_buffers 4 16k;
+                    }
+
+                    location ~ /\.ht {
+                        deny all;
+                    }
+                }
+                EOF
+                nginx -g 'daemon off;'
 
     service:
       app:
@@ -85,6 +130,27 @@ spec:
         advancedMounts:
           invoiceninja:
             init-storage:
-              - path: /var/www/html/storage
+              - path: /var/app/storage
             app:
-              - path: /var/www/html/storage
+              - path: /var/app/storage
+      public:
+        type: emptyDir
+        advancedMounts:
+          invoiceninja:
+            init-public:
+              - path: /public
+            app:
+              - path: /var/app/public
+            nginx:
+              - path: /var/www/app/public
+      # Mount uploaded files into public/storage
+      public-storage:
+        existingClaim: invoiceninja-storage
+        advancedMounts:
+          invoiceninja:
+            app:
+              - path: /var/app/public/storage
+                subPath: app/public
+            nginx:
+              - path: /var/www/app/public/storage
+                subPath: app/public
