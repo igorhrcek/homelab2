@@ -13,4 +13,4 @@ data:
     - name: VictoriaLogs
       type: victoriametrics-logs-datasource
       access: proxy
-      url: http://victoria-logs-victoria-logs-single-server.monitoring.svc:9428
+      url: http://victorialogs-victoria-logs-single-server.monitoring.svc:9428
