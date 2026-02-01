@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- kubernetes-apiserver-rules.yaml
+- kubernetes-apps-rules.yaml
+- kubernetes-controller-rules.yaml
+- kubernetes-kubelet-rules.yaml
+- kubernetes-recorded-rules-rules.yaml
+- kubernetes-resources-rules.yaml
+- kubernetes-scheduler-rules.yaml
+- kubernetes-storage-rules.yaml
+- kubernetes-system-rules.yaml
+- monitoring-blackbox-rules.yaml
+- mysql-rules.yaml
+- smartctl-rules.yaml
+- victoriametrics-alertmanager-rules.yaml
+- victoriametrics-cluster-rules.yaml
+- victoriametrics-health-rules.yaml
+- victoriametrics-vmagent-rules.yaml
+- victoriametrics-vmalert-rules.yaml

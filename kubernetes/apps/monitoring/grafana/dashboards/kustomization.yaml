@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- alertmanager-summary.yaml
+- ceph-cluster.yaml
+- ceph-osd.yaml
+- ceph-pools.yaml
+- dashboard-index.yaml
+- kubernetes-compute-namespace-pods.yaml
+- kubernetes-compute-namespace-workloads.yaml
+- kubernetes-compute-node-pods.yaml
+- kubernetes-compute-resources-pod.yaml
+- kubernetes-compute-resources.yaml
+- kubernetes-compute-workload.yaml
+- kubernetes-kubelet.yaml
+- kubernetes-kubernetes-persistent-volumes.yaml
+- kubernetes-networking-cluster.yaml
+- kubernetes-networking-namespace-pods.yaml
+- kubernetes-networking-namespace-workloads.yaml
+- kubernetes-networking-pods.yaml
+- kubernetes-networking-workload.yaml
+- kubernetes-nginx-ingress-controller.yaml
+- kubernetes-views-global.yaml
+- kubernetes-views-namespaces.yaml
+- kubernetes-views-node-pools.yaml
+- kubernetes-views-nodes.yaml
+- kubernetes-views-pods.yaml
+- kubernetes-volume-performance.yaml
+- mysql-summary.yaml
+- node-exporter.yaml
+- node-feature-discovery.yaml
+- smartctl.yaml
+- ups-summary.yaml
+- victoriametrics-single.yaml
+- vmagent-summary.yaml
+- volsync-summary.yaml

@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: webhooks-slack
+  namespace: flux-system
+spec:
+  path: ./kubernetes/apps/monitoring/webhooks/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  interval: 15m
+  retryInterval: 1m
+  timeout: 3m
+  dependsOn:
+    - name: victoriametrics
+      namespace: flux-system
