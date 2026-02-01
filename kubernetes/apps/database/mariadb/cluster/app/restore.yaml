@@ -4,20 +4,19 @@ kind: Restore
 metadata:
   name: restore
 spec:
+  targetRecoveryTime: 2026-01-26T00:00:01Z
   mariaDbRef:
     name: mariadb-galera
-  bootstrapFrom:
-    targetRecoveryTime: 2026-01-26T00:00:01Z
-    s3:
-      bucket: backups
-      prefix: mariadb
-      endpoint: 5fda75e1262c2da5d9b80e4218045c63.r2.cloudflarestorage.com
-      region: auto
-      accessKeyIdSecretKeyRef:
-        name: mariadb-backup-secret
-        key: AWS_ACCESS_KEY_ID
-      secretAccessKeySecretKeyRef:
-        name: mariadb-backup-secret
-        key: AWS_SECRET_ACCESS_KEY
-      tls:
-        enabled: true
+  s3:
+    bucket: backups
+    prefix: mariadb
+    endpoint: 5fda75e1262c2da5d9b80e4218045c63.r2.cloudflarestorage.com
+    region: auto
+    accessKeyIdSecretKeyRef:
+      name: mariadb-backup-secret
+      key: AWS_ACCESS_KEY_ID
+    secretAccessKeySecretKeyRef:
+      name: mariadb-backup-secret
+      key: AWS_SECRET_ACCESS_KEY
+    tls:
+      enabled: true
