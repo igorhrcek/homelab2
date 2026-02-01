@@ -47,6 +47,8 @@ jobs:
         uses: actions/create-github-app-token@v2
         id: app-token
         with:
+          owner: igorhrcek
+          repository: homelab2
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
