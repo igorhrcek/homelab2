@@ -7,4 +7,4 @@ resources:
   - ./glance/ks.yaml
   - ./meilisearch/ks.yaml
   - ./librechat/ks.yaml
-  # - ./invoiceninja/ks.yaml
+  - ./invoiceninja/ks.yaml
