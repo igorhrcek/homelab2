@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: invoiceninja-nginx-config
-  namespace: apps
+  namespace: services
 data:
   invoiceninja.conf: |
     # https://nginx.org/en/docs/http/ngx_http_core_module.html
