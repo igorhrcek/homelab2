@@ -20,14 +20,9 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
-  dependsOn:
-    - name: volsync
-      namespace: flux-system
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CLAIM: invoiceninja-storage
-      VOLSYNC_CAPACITY: 10Gi
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

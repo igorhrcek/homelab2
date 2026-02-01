@@ -25,45 +25,14 @@ spec:
 
         annotations:
           secret.reloader.stakater.com/reload: "invoiceninja-secret"
+          configmap.reloader.stakater.com/reload: "invoiceninja-nginx-config"
 
         replicas: 1
-
-        initContainers:
-          init-storage:
-            image:
-              repository: busybox
-              tag: latest
-            command:
-              - sh
-              - -c
-              - |
-                mkdir -p /storage/app/public
-                mkdir -p /storage/framework/{cache,sessions,views}
-                mkdir -p /storage/logs
-          init-public:
-            image:
-              repository: invoiceninja/invoiceninja
-              tag: 5.12
-            command:
-              - sh
-              - -c
-              - |
-                # Find and copy public files
-                if [ -d /var/www/html/public ]; then
-                  cp -a /var/www/html/public/. /public/
-                elif [ -d /var/www/app/public ]; then
-                  cp -a /var/www/app/public/. /public/
-                else
-                  echo "Public dir not found, listing /var/www:"
-                  ls -la /var/www/ || true
-                  ls -la /var/ || true
-                  exit 1
-                fi
 
         containers:
           app:
             image:
-              repository: invoiceninja/invoiceninja
+              repository: invoiceninja/invoiceninja-debian
               tag: 5.12
             envFrom:
               - secretRef:
@@ -73,41 +42,6 @@ spec:
             image:
               repository: nginx
               tag: alpine
-            command: ["/bin/sh", "-c"]
-            args:
-              - |
-                cat > /etc/nginx/conf.d/default.conf << 'EOF'
-                server {
-                    listen 80 default_server;
-                    server_name _;
-                    root /var/www/html/public;
-                    index index.php;
-                    client_max_body_size 100M;
-
-                    location / {
-                        try_files $uri $uri/ /index.php?$query_string;
-                    }
-
-                    location = /favicon.ico { access_log off; log_not_found off; }
-                    location = /robots.txt  { access_log off; log_not_found off; }
-
-                    location ~ \.php$ {
-                        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-                        fastcgi_pass 127.0.0.1:9000;
-                        fastcgi_index index.php;
-                        include fastcgi_params;
-                        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                        fastcgi_param PATH_INFO $fastcgi_path_info;
-                        fastcgi_buffer_size 16k;
-                        fastcgi_buffers 4 16k;
-                    }
-
-                    location ~ /\.ht {
-                        deny all;
-                    }
-                }
-                EOF
-                nginx -g 'daemon off;'
 
     service:
       app:
@@ -118,7 +52,7 @@ spec:
           lbipam.cilium.io/ips: "10.40.0.15"
         ports:
           http:
-            port: &port 80
+            port: &port 8000
 
     route:
       app:
@@ -133,32 +67,52 @@ spec:
                 port: *port
 
     persistence:
-      storage:
-        existingClaim: invoiceninja-storage
+      public:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
         advancedMounts:
           invoiceninja:
-            init-storage:
-              - path: /storage
+            app:
+              - path: /var/www/html/public
+            nginx:
+              - path: /var/www/html/public
+                readOnly: true
+
+      storage:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: ceph-block
+        advancedMounts:
+          invoiceninja:
             app:
               - path: /var/www/html/storage
-      public:
-        type: emptyDir
+            nginx:
+              - path: /var/www/html/storage
+                readOnly: true
+
+      config:
+        enabled: true
+        type: configMap
+        name: invoiceninja-nginx-config
         advancedMounts:
           invoiceninja:
-            init-public:
-              - path: /public
-            app:
-              - path: /var/www/html/public
             nginx:
-              - path: /var/www/html/public
-      # Mount uploaded files into public/storage
-      public-storage:
-        existingClaim: invoiceninja-storage
+              - path: /etc/nginx/conf.d/default.conf
+                readOnly: true
+                subPath: default.conf
+
+      nginx-server:
+        enabled: true
+        type: configMap
+        name: invoiceninja-nginx-config
         advancedMounts:
           invoiceninja:
-            app:
-              - path: /var/www/html/public/storage
-                subPath: app/public
             nginx:
-              - path: /var/www/html/public/storage
-                subPath: app/public
+              - path: /etc/nginx/conf.d/invoiceninja.conf
+                readOnly: true
+                subPath: invoiceninja.conf
