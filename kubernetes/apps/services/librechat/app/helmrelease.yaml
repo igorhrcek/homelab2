@@ -60,7 +60,7 @@ spec:
             image:
               # renovate: datasource=docker depName=ghcr.io/danny-avila/librechat-dev
               repository: ghcr.io/danny-avila/librechat
-              tag: latest@sha256:0683d43fb72342d253d82785625c752e06403d53053c20e272b8865ea6d38092
+              tag: latest@sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b
             env: &env
               ENDPOINTS: "agents,assistants,custom"
               PORT: "3080"
