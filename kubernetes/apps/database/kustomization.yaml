@@ -5,6 +5,3 @@ resources:
   - ./namespace.yaml
   - ./mariadb/ks.yaml
   - ./redis/operator/ks.yaml
-  - ./redis/librechat/ks.yaml
-  - ./mongodb/operator/ks.yaml
-  - ./mongodb/librechat/ks.yaml
