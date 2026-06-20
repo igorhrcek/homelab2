@@ -169,7 +169,7 @@ spec:
                 secretName: vmbackup-secret
           containers:
             - name: vmbackup
-              image: victoriametrics/vmbackup:v1.144.0
+              image: victoriametrics/vmbackup:v1.145.0
               command: ["/bin/sh", "-c"]
               args:
                 - |
