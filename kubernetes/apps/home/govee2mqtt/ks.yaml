@@ -25,7 +25,7 @@ spec:
       namespace: flux-system
     - name: volsync
       namespace: flux-system
-    - name: vernemq
+    - name: mosquitto
       namespace: flux-system
   postBuild:
     substitute:
