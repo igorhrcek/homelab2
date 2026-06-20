@@ -29,7 +29,7 @@ spec:
     controllers:
       mosquitto:
         annotations:
-          configmap.reloader.stakater.com/reload: "mosqutto-config"
+          configmap.reloader.stakater.com/reload: "mosquitto-config"
         containers:
           app:
             image:
