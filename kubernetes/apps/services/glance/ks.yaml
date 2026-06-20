@@ -24,9 +24,6 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
-  dependsOn:
-    - name: unifi-dns
-      namespace: network
   postBuild:
     substituteFrom:
       - name: cluster-secrets
