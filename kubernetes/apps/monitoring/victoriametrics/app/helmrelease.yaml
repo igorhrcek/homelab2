@@ -174,7 +174,7 @@ spec:
               args:
                 - |
                   echo "Waiting for vmstorage to be ready..."
-                  until wget -q --spider http://localhost:8482/health; do
+                  until wget -q --spider http://127.0.0.1:8482/health; do
                     echo "vmstorage not ready, waiting 10s..."
                     sleep 10
                   done
@@ -183,7 +183,7 @@ spec:
                     /vmbackup-prod \
                       -dst=s3://backups/victoriametrics \
                       -customS3Endpoint=https://5fda75e1262c2da5d9b80e4218045c63.r2.cloudflarestorage.com \
-                      -snapshot.createURL=http://localhost:8482/snapshot/create \
+                      -snapshot.createURL=http://127.0.0.1:8482/snapshot/create \
                       -storageDataPath=/storage
                     echo "Backup completed, sleeping 24 hours..."
                     sleep 86400
