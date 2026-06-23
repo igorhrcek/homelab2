@@ -2,16 +2,16 @@
     - name: smartctl.rules
       rules:
         - alert: SmartDeviceHighTemperature
-          description:
-            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+          description: |
+              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               has a temperature higher than 80°C.
           expr: smartctl_device_temperature > 80
           for: 15m
           labels:
             severity: critical
         - alert: SmartDeviceTestFailed
-          description:
-            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+          description: |
+              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               did not pass its SMART test.
           expr: |
             (
@@ -23,8 +23,8 @@
           labels:
             severity: critical
         - alert: SmartDeviceCriticalWarning
-          description:
-            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+          description: |
+              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               is in a critical state.
           expr: smartctl_device_critical_warning != 0
           for: 15m
@@ -34,24 +34,24 @@
         # https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-smartctl-exporter/rules/rules.txt
         #
         - alert: SmartDeviceMediaErrors
-          description:
-            summary: Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+          description: |
+              Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
               has media errors.
           expr: smartctl_device_media_errors != 0
           for: 15m
           labels:
             severity: critical
         - alert: SmartDeviceAvailableSpareUnderThreadhold
-          description:
-            summary: Device {{ $labels.device }} on instance {{ $labels.instance }}
+          description: |
+              Device {{ $labels.device }} on instance {{ $labels.instance }}
               is under available spare threashold.
           expr: smartctl_device_available_spare_threshold > smartctl_device_available_spare
           for: 15m
           labels:
             severity: critical
         - alert: SmartDeviceInterfaceSlow
-          description:
-            summary: Device {{ $labels.device }} on instance {{ $labels.instance }}
+          description: |
+              Device {{ $labels.device }} on instance {{ $labels.instance }}
               interface is slower then it should be.
           expr: |
             smartctl_device_interface_speed{speed_type="current"} != on(device, instance, namespace, pod) smartctl_device_interface_speed{speed_type="max"}

@@ -10,9 +10,8 @@ spec:
     "rules":
     - "alert": |-
         SmartDeviceHighTemperature
-      "description":
-        "summary": "Mounted drive {{ $labels.device }} on device {{ $labels.instance\
-          \ }} has a temperature higher than 80\xB0C."
+      "description": "Mounted drive {{ $labels.device }} on device {{ $labels.instance\
+        \ }}\nhas a temperature higher than 80\xB0C.\n"
       "expr": |-
         smartctl_device_temperature > 80
       "for": |-
@@ -22,9 +21,9 @@ spec:
           critical
     - "alert": |-
         SmartDeviceTestFailed
-      "description":
-        "summary": |-
-          Mounted drive {{ $labels.device }} on device {{ $labels.instance }} did not pass its SMART test.
+      "description": |
+        Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+        did not pass its SMART test.
       "expr": |
         (
           smartctl_device_smart_status != 1
@@ -38,9 +37,9 @@ spec:
           critical
     - "alert": |-
         SmartDeviceCriticalWarning
-      "description":
-        "summary": |-
-          Mounted drive {{ $labels.device }} on device {{ $labels.instance }} is in a critical state.
+      "description": |
+        Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+        is in a critical state.
       "expr": |-
         smartctl_device_critical_warning != 0
       "for": |-
@@ -50,9 +49,9 @@ spec:
           critical
     - "alert": |-
         SmartDeviceMediaErrors
-      "description":
-        "summary": |-
-          Mounted drive {{ $labels.device }} on device {{ $labels.instance }} has media errors.
+      "description": |
+        Mounted drive {{ $labels.device }} on device {{ $labels.instance }}
+        has media errors.
       "expr": |-
         smartctl_device_media_errors != 0
       "for": |-
@@ -62,9 +61,9 @@ spec:
           critical
     - "alert": |-
         SmartDeviceAvailableSpareUnderThreadhold
-      "description":
-        "summary": |-
-          Device {{ $labels.device }} on instance {{ $labels.instance }} is under available spare threashold.
+      "description": |
+        Device {{ $labels.device }} on instance {{ $labels.instance }}
+        is under available spare threashold.
       "expr": |-
         smartctl_device_available_spare_threshold > smartctl_device_available_spare
       "for": |-
@@ -74,9 +73,9 @@ spec:
           critical
     - "alert": |-
         SmartDeviceInterfaceSlow
-      "description":
-        "summary": |-
-          Device {{ $labels.device }} on instance {{ $labels.instance }} interface is slower then it should be.
+      "description": |
+        Device {{ $labels.device }} on instance {{ $labels.instance }}
+        interface is slower then it should be.
       "expr": |
         smartctl_device_interface_speed{speed_type="current"} != on(device, instance, namespace, pod) smartctl_device_interface_speed{speed_type="max"}
       "for": |-
