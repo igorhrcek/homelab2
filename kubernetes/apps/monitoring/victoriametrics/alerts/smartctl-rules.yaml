@@ -10,11 +10,11 @@ spec:
     "rules":
     - "alert": |-
         SmartDeviceHighTemperature
-      "annotations":
+      "description":
         "summary": "Mounted drive {{ $labels.device }} on device {{ $labels.instance\
-          \ }} has a temperature higher than 65\xB0C."
+          \ }} has a temperature higher than 80\xB0C."
       "expr": |-
-        smartctl_device_temperature > 65
+        smartctl_device_temperature > 80
       "for": |-
         15m
       "labels":
@@ -22,7 +22,7 @@ spec:
           critical
     - "alert": |-
         SmartDeviceTestFailed
-      "annotations":
+      "description":
         "summary": |-
           Mounted drive {{ $labels.device }} on device {{ $labels.instance }} did not pass its SMART test.
       "expr": |
@@ -38,7 +38,7 @@ spec:
           critical
     - "alert": |-
         SmartDeviceCriticalWarning
-      "annotations":
+      "description":
         "summary": |-
           Mounted drive {{ $labels.device }} on device {{ $labels.instance }} is in a critical state.
       "expr": |-
@@ -50,7 +50,7 @@ spec:
           critical
     - "alert": |-
         SmartDeviceMediaErrors
-      "annotations":
+      "description":
         "summary": |-
           Mounted drive {{ $labels.device }} on device {{ $labels.instance }} has media errors.
       "expr": |-
@@ -62,7 +62,7 @@ spec:
           critical
     - "alert": |-
         SmartDeviceAvailableSpareUnderThreadhold
-      "annotations":
+      "description":
         "summary": |-
           Device {{ $labels.device }} on instance {{ $labels.instance }} is under available spare threashold.
       "expr": |-
@@ -74,7 +74,7 @@ spec:
           critical
     - "alert": |-
         SmartDeviceInterfaceSlow
-      "annotations":
+      "description":
         "summary": |-
           Device {{ $labels.device }} on instance {{ $labels.instance }} interface is slower then it should be.
       "expr": |
