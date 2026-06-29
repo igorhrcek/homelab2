@@ -25,7 +25,11 @@ spec:
       cephFSKernelMountOptions: ms_mode=prefer-crc
       enableLiveness: true
       serviceMonitor:
-        enabled: true
+        # ponytail: Rook v1.20.1 ships a csi-metrics ServiceMonitor but no backing
+        # csi-metrics service (CSI grpc-metrics removed upstream) -> 0 targets ->
+        # perpetual ScrapePoolHasNoTargets. Re-enable if Rook restores a scrapable
+        # CSI metrics service.
+        enabled: false
     monitoring:
       enabled: true
     resources:
