@@ -226,6 +226,19 @@ spec:
       enabled: true
     kubeEtcd:
       enabled: true
+      endpoints:
+        - 10.40.0.101
+        - 10.40.0.102
+        - 10.40.0.103
+      service:
+        enabled: true
+        port: 2381
+        targetPort: 2381
+      vmScrape:
+        spec:
+          endpoints:
+            - port: http-metrics
+              scheme: http
     kubeScheduler:
       enabled: true
       endpoints: []
