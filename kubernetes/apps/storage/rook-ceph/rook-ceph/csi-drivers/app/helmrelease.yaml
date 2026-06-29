@@ -20,7 +20,9 @@ spec:
   values:
     drivers:
       cephfs:
-        enabled: true
+        # No CephFS consumers (0 PVCs/PVs/attachments). Driver disabled to
+        # drop the broken nodeplugin DS + alert. Re-enable if CephFS is needed.
+        enabled: false
       nfs:
         enabled: false
       nvmeof:
