@@ -64,7 +64,7 @@ spec:
         "summary": |-
           Recording rule `{{ $labels.recording }}` ({{ $labels.group }}`) produces no data
       "expr": |-
-        sum(vmalert_recording_rules_last_evaluation_samples{group!="opentelemetry.5xx.rules"}) without(id) < 1
+        sum(vmalert_recording_rules_last_evaluation_samples{group!~"opentelemetry.5xx.rules|kube-prometheus-general.rules|kube-scheduler.rules",recording!="instance:node_load1_per_cpu:ratio"}) without(id) < 1
       "for": |-
         30m
       "labels":
