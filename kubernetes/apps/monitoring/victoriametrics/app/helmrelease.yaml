@@ -60,7 +60,10 @@ spec:
       annotations: {}
 
     defaultRules:
-      create: false
+      # Chart 0.85.x renamed `create` to `enabled` and moved default-rule
+      # deployment to the sync-job; the old key silently became a no-op and
+      # 39 upstream mixin VMRules got deployed alongside our curated ones.
+      enabled: false
 
     alertmanager:
       enabled: true
