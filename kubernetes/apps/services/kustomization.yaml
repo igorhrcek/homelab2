@@ -6,3 +6,4 @@ resources:
   - ./flame/ks.yaml
   - ./glance/ks.yaml
   - ./invoiceninja/ks.yaml
+  - ./reflector/ks.yaml
