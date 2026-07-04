@@ -5,5 +5,5 @@ kind: Kustomization
 namespace: apps
 resources:
   - ./helmrelease.yaml
-  - ../../../../templates/volsync
   - ./secret.yaml
+  - ./secret-ghcr.yaml
