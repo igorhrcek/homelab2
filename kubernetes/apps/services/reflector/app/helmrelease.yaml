@@ -58,9 +58,9 @@ spec:
 
     route:
       app:
-        hostnames: ["reflector.${SECRET_DOMAIN_SMS}"]
+        hostnames: ["reflector.${SECRET_DOMAIN}"]
         parentRefs:
-          - name: envoy-internal
+          - name: envoy-external
             namespace: network
             sectionName: https
         rules:
