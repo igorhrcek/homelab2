@@ -4,7 +4,7 @@ data_dir: /vector-data-dir
 sources:
   k8s_source:
     type: kubernetes_logs
-    kubeconfig: ""
+    kube_config_file: ""
 sinks:
   k8s:
     type: vector
