@@ -28,6 +28,8 @@ spec:
           identifier: vector-agent
         type: daemonset
         strategy: RollingUpdate
+        pod:
+          automountServiceAccountToken: true
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -38,11 +40,6 @@ spec:
             env:
               PROCFS_ROOT: /host/proc
               SYSFS_ROOT: /host/sys
-              KUBECONFIG: "" # Completely short-circuits the file lookup chain
-              K8S_NODE_NAME:
-                valueFrom:
-                  fieldRef:
-                    fieldPath: spec.nodeName
               VECTOR_SELF_NODE_NAME:
                 valueFrom:
                   fieldRef:
