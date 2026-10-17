@@ -1,0 +1,11 @@
+# Lets tuppr (namespace: services) authenticate to the Talos API as os:admin to
+# drive Talos and Kubernetes upgrades. Talos installs the talos.dev
+# ServiceAccount CRD once this is enabled on the nodes.
+machine:
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:admin
+      allowedKubernetesNamespaces:
+        - services

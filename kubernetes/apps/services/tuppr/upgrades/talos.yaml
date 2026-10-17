@@ -1,0 +1,35 @@
+---
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: TalosUpgrade
+metadata:
+  name: talos
+  # To retry after a terminal Failed phase, apply the reset annotation directly:
+  #   kubectl annotate talosupgrade talos tuppr.home-operations.com/reset="$(date)"
+  # Do NOT commit that annotation here: tuppr deletes it once consumed, so Flux
+  # would keep re-adding it every reconcile and reset the roll mid-flight.
+  # Editing .spec is not a substitute — fields matching CRD defaults do not bump
+  # .metadata.generation, so tuppr keeps skipping as terminal.
+spec:
+  talos:
+    # tuppr does not enforce Talos' one-minor-at-a-time upgrade path. Only bump
+    # this to the next minor once every node reports the current one.
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    version: v1.14.4
+  policy:
+    rebootMode: powercycle
+  healthChecks:
+    # Every node Ready before touching the next one.
+    - apiVersion: v1
+      kind: Node
+      expr: |-
+        status.conditions.filter(c, c.type == 'Ready').all(c, c.status == 'True')
+      timeout: 10m
+    # Ceph must not be in HEALTH_ERR; HEALTH_WARN is tolerated because a
+    # rebooted OSD briefly degrades PGs between nodes.
+    - apiVersion: ceph.rook.io/v1
+      kind: CephCluster
+      name: rook-ceph
+      namespace: rook-ceph
+      expr: |-
+        status.ceph.health in ['HEALTH_OK', 'HEALTH_WARN']
+      timeout: 15m
