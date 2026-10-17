@@ -41,9 +41,11 @@ spec:
           - name: forward
             parameters: . /etc/resolv.conf
           - name: cache
+            parameters: "30"
             configBlock: |-
+              success 9984 30
+              denial 9984 5
               prefetch 20
-              serve_stale
           - name: loop
           - name: reload
           - name: loadbalance
