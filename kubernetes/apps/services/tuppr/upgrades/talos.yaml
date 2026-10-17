@@ -17,6 +17,10 @@ spec:
     version: v1.14.4
   policy:
     rebootMode: powercycle
+    # Drain and wait for RWO CSI volumes (ceph-block) to detach before the
+    # reboot; otherwise rescheduled pods hit Multi-Attach until the attach
+    # controller force-detaches ~6 min later.
+    waitForVolumeDetach: true
   healthChecks:
     # Every node Ready before touching the next one.
     - apiVersion: v1
