@@ -18,6 +18,7 @@ spec:
       runAsGroup: ${APP_GID:-1000}
       fsGroup: ${APP_GID:-1000}
     pruneIntervalDays: 7
+    unlock: "2026-10-17"
     repository: ${APP}-volsync-r2
     retain:
       daily: 7
