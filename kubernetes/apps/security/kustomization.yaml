@@ -8,3 +8,4 @@ resources:
   - ./external-secrets/ks.yaml
   - ./volsync/ks.yaml
   - ./atuin/ks.yaml
+  # - ./renovate-operator/ks.yaml
