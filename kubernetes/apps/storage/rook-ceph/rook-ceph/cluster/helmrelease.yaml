@@ -38,6 +38,27 @@ spec:
       healthCheck:
         clusterDisruption:
           disabled: true
+        # Ceph Tentacle 20.2.4 flags legacy `aes` cephx keys. CSI keys must stay
+        # `aes` until the Talos kernel reaches 7.0 (aes256k kernel support), so
+        # these warnings cannot clear yet. Unmute once CSI keys are rotated.
+        muteHealthWarning:
+          AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE:
+            policy: mute
+          AUTH_INSECURE_CLIENT_KEY_TYPE:
+            policy: mute
+          AUTH_INSECURE_KEYS_ALLOWED:
+            policy: mute
+          AUTH_INSECURE_KEYS_CREATABLE:
+            policy: mute
+      security:
+        cephx:
+          # Rotate mon/mgr/osd keys to aes256k (clears AUTH_INSECURE_SERVICE_KEY_TYPE).
+          # Bump keyGeneration above status.cephx.*.keyGeneration to rotate again.
+          daemon:
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+          csi:
+            keyType: aes
       network:
         provider: host
         connections:
