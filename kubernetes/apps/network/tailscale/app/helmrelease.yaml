@@ -16,6 +16,10 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         strategy: Recreate
+        pod:
+          # containerboot always builds a kube client when it detects it runs
+          # in Kubernetes; without the SA token mounted it fatals at boot.
+          automountServiceAccountToken: true
         containers:
           app:
             image:
@@ -35,6 +39,9 @@ spec:
               # Node identity persists on the PVC, so the pod keeps the same
               # tailnet machine (and approved routes) across restarts.
               TS_STATE_DIR: /var/lib/tailscale
+              # Empty: keep state on the PVC, not in a Kubernetes Secret, so
+              # no RBAC on Secrets is needed.
+              TS_KUBE_SECRET: ""
               TS_AUTH_ONCE: "true"
               TS_SOCKET: /tmp/tailscaled.sock
             envFrom:
