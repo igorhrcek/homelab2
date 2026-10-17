@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app tailscale
+  namespace: network
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: tailscale
+  values:
+    controllers:
+      tailscale:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/tailscale/tailscale
+              tag: v1.104.1@sha256:87c55d6be56ad85b3d8bceca5f87f73de288c609131460dd1be1874c250cc41d
+            # Image entrypoint is containerboot: it starts tailscaled, runs
+            # `tailscale up` from TS_* env, and keeps the node registered.
+            env:
+              TZ: "Europe/Belgrade"
+              TS_HOSTNAME: "k8s-subnet-router"
+              # Userspace networking: no /dev/net/tun, no NET_ADMIN, no
+              # privileged. Subnet routes are forwarded through netstack.
+              TS_USERSPACE: "true"
+              # Advertise LAN (nodes, VIP 10.40.0.2, LB IPs) + services + pods.
+              TS_ROUTES: "10.40.0.0/24,10.43.0.0/16,10.42.0.0/16"
+              TS_ACCEPT_DNS: "false"
+              # Node identity persists on the PVC, so the pod keeps the same
+              # tailnet machine (and approved routes) across restarts.
+              TS_STATE_DIR: /var/lib/tailscale
+              TS_AUTH_ONCE: "true"
+              TS_SOCKET: /tmp/tailscaled.sock
+            envFrom:
+              - secretRef:
+                  name: tailscale-secret
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["tailscale", "--socket=/tmp/tailscaled.sock", "status"]
+                  initialDelaySeconds: 20
+                  periodSeconds: 30
+            securityContext:
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+    persistence:
+      state:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: ceph-block
+        globalMounts:
+          - path: /var/lib/tailscale
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
