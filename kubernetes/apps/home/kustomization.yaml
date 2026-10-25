@@ -7,3 +7,5 @@ resources:
   - ./zigbee2mqtt/ks.yaml
   - ./homeassistant/ks.yaml
   - ./govee2mqtt/ks.yaml
+  - ./whisper/ks.yaml
+  - ./piper/ks.yaml
