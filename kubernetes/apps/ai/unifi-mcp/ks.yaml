@@ -6,14 +6,14 @@ metadata:
   name: &app unifi-mcp
   namespace: flux-system
 spec:
-  targetNamespace: services
+  targetNamespace: ai
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: onepassword-connect-clustersecretstore
       namespace: flux-system
-  path: ./kubernetes/apps/services/unifi-mcp/app
+  path: ./kubernetes/apps/ai/unifi-mcp/app
   prune: true
   sourceRef:
     kind: GitRepository
