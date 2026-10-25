@@ -35,6 +35,13 @@ spec:
       env:
         data:
           TZ: "Europe/Belgrade"
+          # Pod runs as uid 1000 with no passwd entry. uiprotect persists its
+          # session cookie under platformdirs' user config dir, which needs a
+          # writable HOME; without it the path resolves under /app (root-owned)
+          # and the Protect login fails with PermissionError.
+          HOME: /tmp
+          XDG_CONFIG_HOME: /tmp/.config
+          XDG_CACHE_HOME: /tmp/.cache
           UNIFI_HOST: "10.10.0.1"
           UNIFI_PORT: "443"
           UNIFI_VERIFY_SSL: "false"
@@ -114,6 +121,12 @@ spec:
                 enabled: false
             securityContext: *sc
             resources: *resources
+
+    persistence:
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
 
     service:
       app:
