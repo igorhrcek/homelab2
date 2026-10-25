@@ -44,6 +44,10 @@ spec:
               - small-int8
               - --language
               - en
+              - --beam-size
+              - "1"
+              - --cpu-threads
+              - "8"
               - --download-dir
               - /data
             env:
@@ -80,7 +84,7 @@ spec:
                 drop: ["ALL"]
             resources:
               requests:
-                cpu: 500m
+                cpu: "2"
                 memory: 1Gi
               limits:
                 memory: 3Gi
