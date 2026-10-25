@@ -8,3 +8,4 @@ resources:
   - ./invoiceninja/ks.yaml
   - ./reflector/ks.yaml
   - ./tuppr/ks.yaml
+  - ./unifi-mcp/ks.yaml

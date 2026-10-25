@@ -1,0 +1,130 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app unifi-mcp
+  namespace: services
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+    configMaps:
+      # Shared settings for both servers. Per-server overrides (UNIFI_MCP_PORT)
+      # live on the container.
+      env:
+        data:
+          TZ: "Europe/Belgrade"
+          UNIFI_HOST: "10.10.0.1"
+          UNIFI_PORT: "443"
+          UNIFI_VERIFY_SSL: "false"
+          UNIFI_MCP_HTTP_ENABLED: "true"
+          UNIFI_MCP_HTTP_TRANSPORT: streamable-http
+          UNIFI_MCP_HOST: "0.0.0.0"
+          # Host-header allow list; DNS-rebinding protection stays on.
+          UNIFI_MCP_ALLOWED_HOSTS: "localhost,127.0.0.1,unifi-mcp.${SECRET_DOMAIN},unifi-mcp.${SECRET_DOMAIN}:3000,unifi-mcp.${SECRET_DOMAIN}:3001,10.40.0.18,10.40.0.18:3000,10.40.0.18:3001"
+          # Writes stay preview-then-confirm; secret redaction stays on.
+          UNIFI_TOOL_PERMISSION_MODE: confirm
+          UNIFI_MCP_LOG_LEVEL: INFO
+
+    controllers:
+      unifi-mcp:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        replicas: 1
+
+        containers:
+          # MCP HTTP has no caller authentication. Exposure is limited to the
+          # LAN / tailnet via a fixed LoadBalancer IP; never route this through
+          # envoy-external or a Cloudflare tunnel without an auth layer.
+          network:
+            image:
+              repository: ghcr.io/sirkirby/unifi-network-mcp
+              tag: 0.40.0
+            env:
+              UNIFI_MCP_PORT: "3000"
+            envFrom: &envFrom
+              - configMapRef:
+                  identifier: env
+              - secretRef:
+                  name: unifi-mcp-secret
+            probes:
+              liveness: &probeNetwork
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 3000
+                  initialDelaySeconds: 10
+                  periodSeconds: 30
+              readiness: *probeNetwork
+              startup:
+                enabled: false
+            securityContext: &sc
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: ["ALL"]
+            resources: &resources
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+
+          protect:
+            image:
+              repository: ghcr.io/sirkirby/unifi-protect-mcp
+              tag: 0.9.5
+            env:
+              UNIFI_MCP_PORT: "3001"
+            envFrom: *envFrom
+            probes:
+              liveness: &probeProtect
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 3001
+                  initialDelaySeconds: 10
+                  periodSeconds: 30
+              readiness: *probeProtect
+              startup:
+                enabled: false
+            securityContext: *sc
+            resources: *resources
+
+    service:
+      app:
+        controller: *app
+        type: LoadBalancer
+        externalTrafficPolicy: Cluster
+        annotations:
+          external-dns.kubernetes.io/hostname: "unifi-mcp.${SECRET_DOMAIN}."
+          lbipam.cilium.io/ips: "10.40.0.18"
+        ports:
+          network:
+            port: 3000
+          protect:
+            port: 3001
