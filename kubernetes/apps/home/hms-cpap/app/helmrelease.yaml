@@ -1,0 +1,138 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hms-cpap
+  namespace: home
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+
+    controllers:
+      hms-cpap:
+        replicas: 1
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/hms-homelab/hms-cpap
+              tag: 5.6.2
+            # Reads the card mirror that the ezshare-sync sidecar keeps in
+            # /data/sdcard. The ezShare card itself sits in the CPAP and is
+            # AP-only; the Pi at 10.10.0.51 bridges it onto the LAN as plain HTTP.
+            env:
+              TZ: "Europe/Belgrade"
+              WEB_PORT: &port 8893
+              # config.json, SQLite DB, reports. Image default is /config; kept on
+              # the same PVC as the card mirror, no subPath (kubelet makes subPath
+              # dirs root-owned, uid 1000 could not write them on first boot).
+              HMS_CPAP_DATA_DIR: /data/config
+              CPAP_TRANSPORT: local
+              CPAP_FORMAT: resmed
+              CPAP_LOCAL_DIR: /data/sdcard
+              CPAP_DEVICE_ID: resmed_airsense
+              MQTT_BROKER: mosquitto.home.svc.cluster.local
+              MQTT_PORT: "1883"
+              ML_ENABLED: "true"
+              ML_SCHEDULE: weekly
+              ML_MODEL_DIR: /data/config/models
+              ML_MIN_DAYS: "30"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+
+          ezshare-sync:
+            image:
+              repository: docker.io/library/python
+              tag: 3.14-alpine
+            command:
+              - python3
+              - -u
+              - /app/ezshare_sync.py
+            env:
+              TZ: "Europe/Belgrade"
+              EZ_BASE: http://10.10.0.51 # ezShareBridge Pi, nginx -> card at 192.168.4.1
+              EZ_MODE: direct
+              EZ_OUT: /data/sdcard
+              EZ_STATE: /data/ezshare-sync-state.json
+              EZ_DAYS: "7"
+              EZ_INTERVAL: "900"
+              EZ_SKIP_TYPES: SAD # oximetry stream, no oximeter attached
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+
+    service:
+      app:
+        controller: hms-cpap
+        ports:
+          http:
+            port: *port
+
+    route:
+      app:
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: hms-cpap
+                port: *port
+
+    persistence:
+      data:
+        existingClaim: hms-cpap-config
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+      ezshare-sync:
+        type: configMap
+        name: hms-cpap-ezshare-sync
+        advancedMounts:
+          hms-cpap:
+            ezshare-sync:
+              - path: /app/ezshare_sync.py
+                subPath: ezshare_sync.py
+                readOnly: true
