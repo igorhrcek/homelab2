@@ -9,7 +9,7 @@ spec:
     # Kubernetes 1.37 is only supported from Talos 1.14. Bump to v1.37.1 once
     # `kubectl get talosupgrade talos` reports Completed.
     # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-    version: v1.36.2
+    version: v1.37.2
   healthChecks:
     - apiVersion: v1
       kind: Node
