@@ -103,7 +103,7 @@ spec:
           protect:
             image:
               repository: ghcr.io/sirkirby/unifi-protect-mcp
-              tag: 0.9.5
+              tag: 0.11.0
             env:
               UNIFI_MCP_PORT: "3001"
             envFrom: *envFrom
