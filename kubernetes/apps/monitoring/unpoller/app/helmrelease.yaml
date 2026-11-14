@@ -1,0 +1,101 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app unpoller
+  namespace: monitoring
+spec:
+  interval: 15m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+
+    controllers:
+      unpoller:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/unpoller/unpoller
+              tag: v5.9.5
+            env:
+              TZ: "Europe/Belgrade"
+              # Controller (UDM SE). Credentials come from unpoller-secret.
+              UP_UNIFI_DEFAULT_URL: "https://10.10.0.1"
+              UP_UNIFI_DEFAULT_VERIFY_SSL: "false"
+              UP_UNIFI_DEFAULT_SAVE_SITES: "true"
+              # Per-client traffic by app category; powers the Client DPI
+              # dashboard. Roughly 150 series per client.
+              UP_UNIFI_DEFAULT_SAVE_DPI: "true"
+              # Prometheus output only.
+              UP_INFLUXDB_DISABLE: "true"
+              UP_PROMETHEUS_HTTP_LISTEN: "0.0.0.0:9130"
+              UP_PROMETHEUS_NAMESPACE: "unpoller"
+              # Background poll feeding the /metrics cache; matches scrape interval.
+              UP_PROMETHEUS_INTERVAL: "30s"
+              UP_POLLER_DEBUG: "false"
+            envFrom:
+              - secretRef:
+                  name: unpoller-secret
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 9130
+                  initialDelaySeconds: 10
+                  periodSeconds: 30
+              readiness: *probe
+              startup:
+                enabled: false
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+
+    service:
+      app:
+        controller: *app
+        ports:
+          metrics:
+            port: 9130
+
+    serviceMonitor:
+      app:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 30s
+            scrapeTimeout: 25s
