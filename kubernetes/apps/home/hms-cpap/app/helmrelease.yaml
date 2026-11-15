@@ -38,7 +38,7 @@ spec:
           app:
             image:
               repository: ghcr.io/hms-homelab/hms-cpap
-              tag: 5.6.2
+              tag: 5.8.0
             # Reads the card mirror that the ezshare-sync sidecar keeps in
             # /data/sdcard. The ezShare card itself sits in the CPAP and is
             # AP-only; the Pi at 10.10.0.51 bridges it onto the LAN as plain HTTP.
