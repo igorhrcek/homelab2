@@ -1,0 +1,158 @@
+# Reference copy of the rest: entries appended to HA's /config/configuration.yaml
+# (after the existing Klimerko entries). The live copy is on the HA volume, not managed by Flux.
+# After editing the live file: Developer tools → YAML → check config, then reload "RESTful" (rest.reload).
+rest:
+  # Client counts: online, wired / Wi-Fi, Wi-Fi per band (ng 2.4, na 5, 6e 6 GHz).
+  - resource: http://vmselect-victoriametrics.monitoring.svc:8481/select/0/prometheus/api/v1/query
+    params:
+      query: count by (wired, radio) (unpoller_client_uptime_seconds)
+    scan_interval: 30
+    timeout: 10
+    sensor:
+      - name: Network clients online
+        unique_id: network_clients_online
+        icon: mdi:lan-connect
+        unit_of_measurement: clients
+        state_class: measurement
+        value_template: >-
+          {{ value_json.data.result | map(attribute='value.1') | map('int') | sum }}
+      - name: Network clients wired
+        unique_id: network_clients_wired
+        icon: mdi:ethernet
+        unit_of_measurement: clients
+        state_class: measurement
+        value_template: >-
+          {{ value_json.data.result | selectattr('metric.wired', 'eq', 'true')
+             | map(attribute='value.1') | map('int') | sum }}
+      - name: Network clients Wi-Fi
+        unique_id: network_clients_wifi
+        icon: mdi:wifi
+        unit_of_measurement: clients
+        state_class: measurement
+        value_template: >-
+          {{ value_json.data.result | selectattr('metric.wired', 'eq', 'false')
+             | map(attribute='value.1') | map('int') | sum }}
+      - name: Network clients 2.4 GHz
+        unique_id: network_clients_24ghz
+        icon: mdi:wifi-strength-2
+        unit_of_measurement: clients
+        state_class: measurement
+        value_template: >-
+          {{ value_json.data.result | selectattr('metric.radio', 'eq', 'ng')
+             | map(attribute='value.1') | map('int') | sum }}
+      - name: Network clients 5 GHz
+        unique_id: network_clients_5ghz
+        icon: mdi:wifi-strength-3
+        unit_of_measurement: clients
+        state_class: measurement
+        value_template: >-
+          {{ value_json.data.result | selectattr('metric.radio', 'eq', 'na')
+             | map(attribute='value.1') | map('int') | sum }}
+      - name: Network clients 6 GHz
+        unique_id: network_clients_6ghz
+        icon: mdi:wifi-strength-4
+        unit_of_measurement: clients
+        state_class: measurement
+        value_template: >-
+          {{ value_json.data.result | selectattr('metric.radio', 'eq', '6e')
+             | map(attribute='value.1') | map('int') | sum }}
+
+  # Internet: throughput now (Mbit/s), latency (ms), byte counters (GB) for the
+  # daily utility meters. One query; each series tagged with label k.
+  - resource: http://vmselect-victoriametrics.monitoring.svc:8481/select/0/prometheus/api/v1/query
+    params:
+      query: >-
+        label_replace(sum(unpoller_device_wan_receive_rate_bytes) * 8 / 1e6, "k", "down", "", "")
+        or label_replace(sum(unpoller_device_wan_transmit_rate_bytes) * 8 / 1e6, "k", "up", "", "")
+        or label_replace(max(unpoller_device_uplink_latency_seconds) * 1000, "k", "latency", "", "")
+        or label_replace(sum(unpoller_device_wan_receive_bytes_total) / 1e9, "k", "down_total", "", "")
+        or label_replace(sum(unpoller_device_wan_transmit_bytes_total) / 1e9, "k", "up_total", "", "")
+    scan_interval: 30
+    timeout: 10
+    sensor:
+      - name: Internet download
+        unique_id: network_wan_download
+        icon: mdi:download
+        device_class: data_rate
+        unit_of_measurement: Mbit/s
+        state_class: measurement
+        value_template: >-
+          {{ (value_json.data.result | selectattr('metric.k', 'eq', 'down')
+              | map(attribute='value.1') | first | default(0)) | float | round(2) }}
+      - name: Internet upload
+        unique_id: network_wan_upload
+        icon: mdi:upload
+        device_class: data_rate
+        unit_of_measurement: Mbit/s
+        state_class: measurement
+        value_template: >-
+          {{ (value_json.data.result | selectattr('metric.k', 'eq', 'up')
+              | map(attribute='value.1') | first | default(0)) | float | round(2) }}
+      - name: Internet latency
+        unique_id: network_wan_latency
+        icon: mdi:timer-outline
+        device_class: duration
+        unit_of_measurement: ms
+        state_class: measurement
+        value_template: >-
+          {% set v = value_json.data.result | selectattr('metric.k', 'eq', 'latency')
+                     | map(attribute='value.1') | first | default(none) %}
+          {{ v | float | round(1) if v is not none else none }}
+      - name: Internet downloaded total
+        unique_id: network_wan_downloaded_total
+        icon: mdi:download-network
+        device_class: data_size
+        unit_of_measurement: GB
+        state_class: total_increasing
+        value_template: >-
+          {% set v = value_json.data.result | selectattr('metric.k', 'eq', 'down_total')
+                     | map(attribute='value.1') | first | default(none) %}
+          {{ v | float | round(3) if v is not none else none }}
+      - name: Internet uploaded total
+        unique_id: network_wan_uploaded_total
+        icon: mdi:upload-network
+        device_class: data_size
+        unit_of_measurement: GB
+        state_class: total_increasing
+        value_template: >-
+          {% set v = value_json.data.result | selectattr('metric.k', 'eq', 'up_total')
+                     | map(attribute='value.1') | first | default(none) %}
+          {{ v | float | round(3) if v is not none else none }}
+
+  # Busy right now: rx/tx rate (bytes/s) of the five busiest clients. The list
+  # stays in the `result` attribute (at most 10 rows); the dashboard shapes it.
+  - resource: http://vmselect-victoriametrics.monitoring.svc:8481/select/0/prometheus/api/v1/query
+    params:
+      query: >-
+        (label_replace(sum by (name) (unpoller_client_receive_rate_bytes), "dir", "rx", "", "")
+         or label_replace(sum by (name) (unpoller_client_transmit_rate_bytes), "dir", "tx", "", ""))
+        and on (name)
+        topk(5, sum by (name) (unpoller_client_receive_rate_bytes)
+              + sum by (name) (unpoller_client_transmit_rate_bytes))
+    scan_interval: 30
+    timeout: 10
+    sensor:
+      - name: Network busiest clients
+        unique_id: network_busiest_clients
+        icon: mdi:swap-vertical
+        value_template: >-
+          {{ value_json.data.result | map(attribute='metric.name') | unique | list | count }}
+        json_attributes_path: "$.data"
+        json_attributes:
+          - result
+
+  # Access points: Wi-Fi clients per AP and band.
+  - resource: http://vmselect-victoriametrics.monitoring.svc:8481/select/0/prometheus/api/v1/query
+    params:
+      query: count by (ap_name, radio) (unpoller_client_uptime_seconds{wired="false"})
+    scan_interval: 60
+    timeout: 10
+    sensor:
+      - name: Network access points
+        unique_id: network_access_points
+        icon: mdi:access-point
+        value_template: >-
+          {{ value_json.data.result | map(attribute='metric.ap_name') | unique | list | count }}
+        json_attributes_path: "$.data"
+        json_attributes:
+          - result

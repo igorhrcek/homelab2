@@ -1,0 +1,140 @@
+{
+  "views": [
+    {
+      "title": "Network",
+      "path": "overview",
+      "type": "sections",
+      "max_columns": 2,
+      "icon": "mdi:lan",
+      "theme": "Fluvy",
+      "sections": [
+        {
+          "type": "grid",
+          "column_span": 2,
+          "cards": [
+            {
+              "type": "custom:fluvy-net-map",
+              "entry_id": "01M7E85N372HKBTRDQQKNNZN8C",
+              "title": "Network map",
+              "bands_entity": "sensor.network_access_points",
+              "latency_entity": "sensor.internet_latency",
+              "download_entity": "sensor.internet_download",
+              "upload_entity": "sensor.internet_upload",
+              "grid_options": { "columns": "full" }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "column_span": 2,
+          "cards": [
+            { "type": "heading", "heading": "New section" },
+            {
+              "span": "24h",
+              "show_head": true,
+              "show_legend": true,
+              "chart": "soft",
+              "show_points": "none",
+              "show_grid": "y",
+              "type": "custom:fluvy-chart-card",
+              "title": "Internet",
+              "icon": "mdi:web",
+              "series": [
+                { "entity": "sensor.internet_download", "name": "Download", "color": "graph-1" },
+                { "entity": "sensor.internet_upload", "name": "Upload", "color": "graph-4" }
+              ],
+              "grid_options": { "columns": 24, "rows": "auto" }
+            },
+            {
+              "type": "custom:fluvy-readouts-card",
+              "variant": "row",
+              "rows": [
+                { "entity": "sensor.internet_latency", "name": "Latency" },
+                { "entity": "sensor.internet_downloaded_today", "name": "Down today", "decimals": "2" },
+                { "entity": "sensor.internet_uploaded_today", "name": "Up today", "decimals": "2" }
+              ],
+              "grid_options": { "columns": "full" }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "custom:fluvy-stat-tiles-card",
+              "title": "Devices",
+              "entity": "sensor.network_clients_online",
+              "name": "Online",
+              "columns": 3,
+              "decimals": "0",
+              "tiles": [
+                { "entity": "sensor.network_clients_wired", "name": "Wired", "icon": "mdi:ethernet" },
+                { "entity": "sensor.network_clients_wi_fi", "name": "Wi-Fi", "icon": "mdi:wifi" },
+                { "entity": "sensor.network_devices_offline", "name": "Offline", "icon": "mdi:lan-disconnect", "tone": "warning" },
+                { "entity": "sensor.network_clients_6_ghz", "name": "6 GHz", "icon": "mdi:wifi-strength-4" },
+                { "entity": "sensor.network_clients_5_ghz", "name": "5 GHz", "icon": "mdi:wifi-strength-3" },
+                { "entity": "sensor.network_clients_2_4_ghz", "name": "2.4 GHz", "icon": "mdi:wifi-strength-2" }
+              ]
+            },
+            {
+              "type": "custom:fluvy-items-card",
+              "entity": "sensor.network_devices_offline",
+              "title": "Offline",
+              "preset": "none",
+              "variant": "compact",
+              "max_rows": 5,
+              "hide_empty": true,
+              "item_name": "{name}",
+              "item_secondary": "{since}",
+              "item_icon": "mdi:lan-disconnect",
+              "items_template": "{% set ns = namespace(out=[]) %}{% for s in states.device_tracker | selectattr('attributes.source_type', 'defined') | selectattr('attributes.source_type', 'eq', 'router') | rejectattr('state', 'eq', 'home') %}{% set ns.out = ns.out + [{'name': s.name, 'since': s.last_changed.isoformat()}] %}{% endfor %}{{ ns.out | to_json }}",
+              "visibility": [
+                { "condition": "numeric_state", "entity": "sensor.network_devices_offline", "above": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "custom:fluvy-items-card",
+              "entity": "sensor.network_busiest_clients",
+              "title": "Busy right now",
+              "preset": "none",
+              "max_rows": 5,
+              "item_name": "{name}",
+              "item_secondary": "↓ {down} · ↑ {up}",
+              "item_value": "{total}",
+              "item_icon": "mdi:swap-vertical",
+              "empty_text": "All quiet",
+              "items_template": "{% set r = state_attr('sensor.network_busiest_clients', 'result') or [] %}{% macro f(b) %}{% set bits = b * 8 %}{{ (bits / 1000000) | round(1) ~ ' Mb/s' if bits >= 1000000 else (bits / 1000) | round(0) | int ~ ' kb/s' }}{% endmacro %}{% set ns = namespace(out=[]) %}{% for n in r | map(attribute='metric.name') | unique %}{% set rx = r | selectattr('metric.name', 'eq', n) | selectattr('metric.dir', 'eq', 'rx') | map(attribute='value.1') | first | default(0) | float(0) %}{% set tx = r | selectattr('metric.name', 'eq', n) | selectattr('metric.dir', 'eq', 'tx') | map(attribute='value.1') | first | default(0) | float(0) %}{% set ns.out = ns.out + [{'name': n, 'down': f(rx), 'up': f(tx), 'total': f(rx + tx), 'sort': rx + tx}] %}{% endfor %}{{ ns.out | sort(attribute='sort', reverse=true) | to_json }}"
+            },
+            {
+              "type": "custom:fluvy-items-card",
+              "entity": "sensor.network_access_points",
+              "title": "Access points",
+              "preset": "none",
+              "max_rows": 2,
+              "item_name": "{name}",
+              "item_secondary": "{bands}",
+              "item_value": "clients",
+              "item_unit": "clients",
+              "item_icon": "mdi:access-point",
+              "items_template": "{% set a = state_attr('sensor.network_access_points', 'result') or [] %}{% set bands = {'6e': '6 GHz', 'na': '5 GHz', 'ng': '2.4 GHz'} %}{% set ns2 = namespace(out=[]) %}{% for ap in a | map(attribute='metric.ap_name') | unique %}{% set rows = a | selectattr('metric.ap_name', 'eq', ap) | list %}{% set ns3 = namespace(parts=[], total=0) %}{% for k in ['6e', 'na', 'ng'] %}{% set c = rows | selectattr('metric.radio', 'eq', k) | map(attribute='value.1') | map('int') | sum %}{% if c > 0 %}{% set ns3.parts = ns3.parts + [bands[k] ~ ' ' ~ c] %}{% endif %}{% set ns3.total = ns3.total + c %}{% endfor %}{% set ns2.out = ns2.out + [{'name': ap, 'clients': ns3.total, 'bands': ns3.parts | join(' · ')}] %}{% endfor %}{{ ns2.out | sort(attribute='clients', reverse=true) | to_json }}"
+            }
+          ]
+        }
+      ],
+      "cards": [],
+      "dense_section_placement": false
+    }
+  ],
+  "background": {
+    "opacity": 0,
+    "alignment": "center",
+    "size": "cover",
+    "repeat": "repeat",
+    "attachment": "fixed"
+  }
+}
