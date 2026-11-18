@@ -36,7 +36,7 @@ spec:
           app:
             image:
               repository: rhasspy/wyoming-piper
-              tag: 2.5.2
+              tag: 2.5.4
             # Wyoming text-to-speech for Home Assistant Assist (Voice PE).
             # Entrypoint already sets --uri tcp://0.0.0.0:10200 --data-dir /data.
             args:
