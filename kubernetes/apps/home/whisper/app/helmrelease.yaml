@@ -36,7 +36,7 @@ spec:
           app:
             image:
               repository: rhasspy/wyoming-whisper
-              tag: 3.8.1
+              tag: 3.9.1
             # Wyoming speech-to-text for Home Assistant Assist (Voice PE).
             # Entrypoint already sets --uri tcp://0.0.0.0:10300 --data-dir /data --device cpu.
             args:
