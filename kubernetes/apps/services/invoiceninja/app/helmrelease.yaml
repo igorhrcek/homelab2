@@ -33,7 +33,7 @@ spec:
           app:
             image:
               repository: invoiceninja/invoiceninja-debian
-              tag: 5.13
+              tag: 5.14
             envFrom:
               - secretRef:
                   name: invoiceninja-secret
